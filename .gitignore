@@ -1,0 +1,11 @@
+gi*.pyc
+__pycache__/
+
+# Virtual environment
+venv/
+
+# Environment variables file
+.env
+
+node_modules
+
