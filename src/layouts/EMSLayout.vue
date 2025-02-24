@@ -36,7 +36,7 @@
 
           <label class="q-pr-sm">Admin </label>
           <q-icon style="width: 30px; height: 30px">
-            <q-img src="~assets/img99.png" style="border-radius: 50%" />
+            <q-img src="~assets/login3.png" style="border-radius: 50%" />
           </q-icon>
 
         </q-toolbar>
