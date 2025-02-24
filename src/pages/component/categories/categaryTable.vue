@@ -61,14 +61,8 @@
             </div>
           </td>
         </template>
-        <!-- <template v-slot:body-cell-no="props">
-          <td :props="props" class="print-hide">
-            {{ 1 }}
-          </td>
-        </template> -->
-        <template v-slot:body-cell-no="props">
-          <td :props="props" class="print-hide">{{ props.rowIndex  + 1 }}</td>
-        </template>
+
+
       </q-table>
     </div>
   </div>
@@ -99,16 +93,6 @@ export default {
       selected: [],
       selectedRows:[],
       columns: [
-        {
-          name: "no",
-          required: true,
-          label: "S.No",
-          align: "left",
-          field: (row) => row.no,
-          format: (val) => `${val}`,
-          sortable: true,
-        },
-
         {
           name: "id",
           align: "left",
@@ -144,11 +128,12 @@ export default {
     },
 
     createDepartment() {
+      console.log("Submit", this.item)
       console.log("this item", this.item)
-      // this.newDep.id = Math.floor(Math.random() * 1000000 + 1);
+      // this.item.id = Math.floor(Math.random() * 1000000 + 1);
       apiMaker.createDepartment(this.item).then((response) => {
         if (response.status == 201) {
-          // this.newDep.name = "";
+          // this.item.name = "";
           this.get_department();
           this.onClear()
           this.$q.notify({
@@ -157,118 +142,58 @@ export default {
             message: "Your data successfully added",
           });
         }
+        this.get_department()
       }).catch((error) => {
         alert(error);
         console.log(error.data);
       });
     },
-    updateDepartment() {
-      apiMaker.UpdateDepartment(
-        this.newDep.id, {
-      id: this.newDep.id,
-      name: this.newDep.name
+
+    async updateDepartment() {
+  console.log("Updating Department:", this.item);
+
+  if (!this.item.id) {
+    console.error("Error: Department ID is missing!");
+    this.$q.notify({
+      type: "negative",
+      position: "top",
+      message: "Department ID is missing!",
+    });
+    return;
+  }
+
+  try {
+    const response = await apiMaker.UpdateDepartment(this.item.id, {
+      name: this.item.name,
+      description: this.item.description,
+    });
+
+    if (response.status === 200) {
+      this.isEditing = false;
+      this.item = { id: null, name: "", description: "" }; // Clear the form
+      this.get_department(); // Refresh department list
+
+      this.$q.notify({
+        type: "positive",
+        position: "top",
+        message: "Your data was successfully updated!",
+      });
+    } else {
+      console.error("Unexpected response status:", response.status);
     }
-      )
-      .then((response) => {
-            if (response.status === 200) {
-            this.isEditing = false;
-            this.newDep = { id: null, name: "" };  // Clear the form after updating
-            this.get_department();
-              this.$q.notify({
-                type: "positive",
-                position: "top",
-                message: "Your data successfully updated",
-              });
-            } else {
-              console.error("Unexpected response status:", response.status);
-            }
-          })
-        .catch((error) => {
-            console.error("Error during updateDepartment API call:", error);
-            if (error.response && error.response.data) {
-              console.error("API error response data:", error.response.data);
-            }
-            this.$q.notify({
-              type: "negative",
-              position: "top",
-              message: "Something went wrong when trying to update the department",
-            });
-          });
-    },
-    multiDelete() {
-      if (this.selectedRows.length > 0) {
-        this.$q
-          .dialog({
-            title: `Confirm ${this.selectedRows.length} Selected Department`,
-            message: "Do you want to delete all selected rows?",
-            cancel: true,
-            persistent: true,
-            // color: "red"
-            ok: "Delete",
-          })
-          .onOk(() => {
-            // Call a method to delete all selected rows in one API request
-            this.deleteSelectedRows();
-          });
-      } else {
-        alert("No rows selected.");
-      }
-    },
-    async deleteSelectedRows() {
-      try {
+  } catch (error) {
+    console.error("Error during updateDepartment API call:", error);
+    if (error.response && error.response.data) {
+      console.error("API error response data:", error.response.data);
+    }
+    this.$q.notify({
+      type: "negative",
+      position: "top",
+      message: "Something went wrong while updating the department",
+    });
+  }
+      },
 
-        // Make an API request to delete the selected rows in one go
-        const selectedIds = this.selectedRows.map((row) => row.id)
-        for (const id of selectedIds) {
-        // const response = await axios.delete(`/department/${id}`);
-          apiMaker.MultipleDelete(id).then((response) => {
-            if (response.status === 200) {
-              this.$q.notify({
-                  type: "positive",
-                  position:"top",
-                  message: `Selected Departments Deleted`,
-                });
-              console.log("selected records have been deleted succesfully ")
-          // Handle success if needed
-        } else {
-          console.log("selected records not delete!ss ")
-          // Handle error if needed
-        }
-          })
-
-      }
-
-      // Clear the selected rows
-      this.selectedRows = [];
-
-      // Refresh the department data after deletion
-      this.get_department();
-        // Check if the deletion was successful
-        if (response.status === 200) {
-          this.$q.notify({
-            type: "positive",
-            position: "top",
-            message: "Selected rows have been deleted successfully.",
-          });
-
-          // Update the table data by removing the deleted rows
-          // this.rows = this.rows.filter(row => !selectedIds.includes(row.id));
-
-          // Clear the selected rows
-          // this.selectedRows = [];
-        } else {
-          // Handle the case when the deletion fails
-          this.$q.notify({
-            type: "negative",
-            position: "top",
-            message: "Failed to delete selected rows.",
-          });
-        }
-      } catch (error) {
-        // Handle any errors that may occur during the deletion
-        console.error("Error deleting selected rows:", error);
-      }
-    },
     get_department() {
       apiMaker.getDepartment().then((response) => {
         this.rows = response.data.results
@@ -278,8 +203,9 @@ export default {
         console.log("length", this.departmentLength)
       } )
     },
+
     del(id) {
-      console.log("newDep", this.newDep)
+      console.log("item", this.item)
       this.$q
         .dialog({
           title: "Confirm",
@@ -308,16 +234,19 @@ export default {
           // console.log('>>>> OK')
         });
     },
+
     edit(id) {
     apiMaker.getDepartment()
       .then((res) => {
-        const departmentToEdit = res.data.find(dep => dep.id === id);
-        // const departmentToEdit = res.data.id
-        console.log("departmentToEdit", departmentToEdit)
+        console.log("Department",)
+
+        const departmentToEdit = res.data.results.find(dep => dep.id === id);
+
         if (departmentToEdit) {
-        this.newDep.id = departmentToEdit.id;
-        this.newDep.name = departmentToEdit.name;
-        // Clear any previous editing status
+        this.item.id = departmentToEdit.id;
+        this.item.name = departmentToEdit.name;
+        this.item.description = departmentToEdit.description;
+
         this.isEditing = true;
       } else {
         console.error("Department not found for editing.");
@@ -337,6 +266,7 @@ export default {
       });
     });
     },
+
     onClear() {
       this.item.name = ''
       this.item.workshop = ''

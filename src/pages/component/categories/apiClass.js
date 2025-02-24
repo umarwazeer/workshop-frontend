@@ -21,7 +21,7 @@ class apiMaker {
 
   }
   async UpdateDepartment(id,department) {
-    return await axios.put(`${API_URL}/categories/${id}` + department,  { headers: {  Authorization : `Bearer ${token}` }})
+    return await axios.put(`${API_URL}/categories/${id}/`, department,  { headers: {  Authorization : `Bearer ${token}` }})
 
   }
 }
