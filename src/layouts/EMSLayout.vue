@@ -101,11 +101,6 @@
           <q-item-section><q-item-label>Car Model</q-item-label></q-item-section>
         </q-item>
 
-        <q-item clickable v-ripple active to="/new_attandence" class="text-white">
-          <q-item-section avatar><q-icon name="group" /></q-item-section>
-          <q-item-section><q-item-label>Reports</q-item-label></q-item-section>
-        </q-item>
-
         <q-item clickable v-ripple active to="/bill_model" class="text-white">
           <q-item-section avatar><q-icon name="group" /></q-item-section>
           <q-item-section><q-item-label>Bill Model</q-item-label></q-item-section>
